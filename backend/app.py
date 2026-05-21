@@ -25,20 +25,19 @@ def create_app():
     db.init_app(app)
     mail.init_app(app)
 
-    CORS(app, origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://face-attendance-pearl.vercel.app",
-        "https://face-attendance-four.vercel.app"
-    ], supports_credentials=True)
+    # Allow all origins in production (API auth will protect)
+    CORS(app, supports_credentials=True, 
+         origins="*",
+         allow_headers=["Content-Type", "Authorization"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
     authbp = __import__('routes.auth', fromlist=['authbp']).authbp
     employees_bp = __import__('routes.employees', fromlist=['employees_bp']).employees_bp
     attendance_bp = __import__('routes.attendance', fromlist=['attendance_bp']).attendance_bp
     reports_bp = __import__('routes.reports', fromlist=['reports_bp']).reports_bp
-    app.register_blueprint(authbp, url_prefix='/auth')
-    app.register_blueprint(employees_bp, url_prefix='/employees')
-    app.register_blueprint(attendance_bp, url_prefix='/attendance')
-    app.register_blueprint(reports_bp, url_prefix='/reports')
+    app.register_blueprint(authbp, url_prefix='/api/auth')
+    app.register_blueprint(employees_bp, url_prefix='/api/employees')
+    app.register_blueprint(attendance_bp, url_prefix='/api/attendance')
+    app.register_blueprint(reports_bp, url_prefix='/api/reports')
 
    
 
