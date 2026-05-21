@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from extensions import db, mail
 
@@ -31,11 +31,24 @@ def create_app():
     db.init_app(app)
     mail.init_app(app)
 
-    # Allow all origins in production (API auth will protect)
-    CORS(app, supports_credentials=True, 
-         origins="*",
-         allow_headers=["Content-Type", "Authorization"],
-         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+    # CORS Configuration - Allow credentials with wildcard
+    CORS(app, 
+         supports_credentials=True,
+         allow_headers=['Content-Type', 'Authorization'],
+         methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+         expose_headers=['Content-Type'],
+         max_age=3600)
+    
+    # Alternative: Use a function to dynamically check origins
+    @app.after_request
+    def after_request(response):
+        origin = request.headers.get('Origin')
+        if origin:
+            response.headers.add('Access-Control-Allow-Origin', origin)
+            response.headers.add('Access-Control-Allow-Credentials', 'true')
+            response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        return response
     authbp = __import__('routes.auth', fromlist=['authbp']).authbp
     employees_bp = __import__('routes.employees', fromlist=['employees_bp']).employees_bp
     attendance_bp = __import__('routes.attendance', fromlist=['attendance_bp']).attendance_bp
