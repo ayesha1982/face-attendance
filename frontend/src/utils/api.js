@@ -1,12 +1,7 @@
 import axios from 'axios'
 
-const isProduction = import.meta.env.MODE === 'production'
-const apiBaseURL = isProduction 
-  ? 'https://face-attendance-production-cbde.up.railway.app/api'
-  : '/api'
-
 const api = axios.create({
-  baseURL: apiBaseURL,
+  baseURL: 'https://face-attendance-production-cbde.up.railway.app/api',
   withCredentials: true,
   timeout: 30000,
 })

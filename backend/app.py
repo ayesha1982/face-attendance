@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from extensions import db, mail
 
@@ -17,20 +17,23 @@ def create_app():
     app.config['MAIL_PASSWORD']       = os.environ.get('MAIL_PASSWORD', '')
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME', 'noreply@office.com')
 
-    # ── FIX 1: CORS — allow Vercel frontend + localhost ──────────────────
-    raw_origins = os.environ.get(
-        'ALLOWED_ORIGINS',
-        'http://localhost:3000,http://localhost:5173,https://face-attendance-43ynllikg-shaikayeshanilofar-365zs-projects.vercel.app'
-    )
-    allowed_origins = [o.strip() for o in raw_origins.split(',') if o.strip()]
-
+    # ── CORS Configuration for production ──────────────────
     CORS(
         app,
-        origins=allowed_origins,
         supports_credentials=True,
         allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'],
-        methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+        methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        expose_headers=['Content-Type']
     )
+    
+    # ── Allow dynamic origins (any domain can call backend) ──────────────────
+    @app.after_request
+    def set_cors_headers(response):
+        origin = request.headers.get('Origin')
+        if origin:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response
 
     db.init_app(app)
     mail.init_app(app)
