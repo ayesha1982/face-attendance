@@ -18,18 +18,22 @@ def create_app():
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME','noreply@office.com')
 
     # Allow all origins for deployed version (requests will have proper auth)
-    CORS(app, supports_credentials=True)
-    db.init_app(app)
-    mail.init_app(app)
+    CORS(app, origins=[
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://face-attendance-pearl.vercel.app",
+      "https://face-attendance-four.vercel.app"
+    ], supports_credentials=True)
 
-    from routes.auth       import auth_bp
-    from routes.employees  import employees_bp
+    from routes.auth import auth_bp
+    from routes.employees import employees_bp
     from routes.attendance import attendance_bp
-    from routes.reports    import reports_bp
-    app.register_blueprint(auth_bp,       url_prefix='/api/auth')
-    app.register_blueprint(employees_bp,  url_prefix='/api/employees')
+    from routes.reports import reports_bp
+
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(employees_bp, url_prefix='/api/employees')
     app.register_blueprint(attendance_bp, url_prefix='/api/attendance')
-    app.register_blueprint(reports_bp,    url_prefix='/api/reports')
+    app.register_blueprint(reports_bp, url_prefix='/api/reports')
 
     with app.app_context():
         from models.user import User
