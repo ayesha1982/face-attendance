@@ -1,0 +1,88 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║             ⚠️  GIT NOT INSTALLED - INSTALL GUIDE                       ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+❌ PROBLEM:
+  Git is not installed on your computer
+  You need Git to push code to GitHub
+
+───────────────────────────────────────────────────────────────────────────
+
+✅ SOLUTION (2-3 MINUTES):
+
+  STEP 1: Download Git
+  ├─ Go to: https://git-scm.com/download/win
+  └─ Download: Git for Windows (64-bit)
+
+  STEP 2: Install Git
+  ├─ Run the installer
+  ├─ Click Next on each screen (use defaults)
+  ├─ Make sure "Git Bash Here" is checked
+  └─ Click Finish
+
+  STEP 3: Verify Installation
+  ├─ Close PowerShell completely
+  ├─ Open PowerShell again
+  └─ Run: git --version
+      (Should show: git version X.X.X)
+
+───────────────────────────────────────────────────────────────────────────
+
+🚀 AFTER INSTALLING GIT:
+
+  Run these commands (copy & paste):
+
+  cd d:\face-attendance
+  git add .
+  git commit -m "Fix: Optimize dependencies for Railway"
+  git push origin main
+
+  Then wait for Railway to auto-deploy (5-10 min)
+
+───────────────────────────────────────────────────────────────────────────
+
+⏱️  TOTAL TIME:
+
+  Git Install:        2-3 minutes
+  Git Commands:       1 minute  
+  Railway Deploy:     5-10 minutes
+  ────────────────────────────────
+  TOTAL:              10-15 minutes until LIVE! ✅
+
+───────────────────────────────────────────────────────────────────────────
+
+💡 IMPORTANT:
+
+  [1] Download Git from: https://git-scm.com/download/win
+  [2] Use default options - don't change anything
+  [3] RESTART PowerShell after installing
+  [4] Then run the git commands
+
+───────────────────────────────────────────────────────────────────────────
+
+📖 DETAILED GUIDE:
+
+  See: INSTALL-GIT-GUIDE.md (in project folder)
+
+───────────────────────────────────────────────────────────────────────────
+
+🎯 NEXT STEPS:
+
+  1. Install Git (2 min)
+     https://git-scm.com/download/win
+
+  2. Restart PowerShell
+
+  3. Run git commands:
+     cd d:\face-attendance
+     git add .
+     git commit -m "Fix deployment"
+     git push origin main
+
+  4. Wait for Railway to deploy (5-10 min)
+
+  5. Your app is LIVE! 🎉
+
+═══════════════════════════════════════════════════════════════════════════
