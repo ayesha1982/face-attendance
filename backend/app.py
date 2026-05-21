@@ -1,83 +1,61 @@
 import os
-from flask import Flask, request
+from flask import Flask
 from flask_cors import CORS
 from extensions import db, mail
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'face-attend-2024')
-    
-    # Session configuration for production
-    app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS only
-    app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JS access
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
-    app.config['PERMANENT_SESSION_LIFETIME'] = 24 * 60 * 60  # 24 hours
-    
-    # Anchor the database explicitly to the project directory
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'attendance.db')
-    
+    app.config['SECRET_KEY']                     = os.environ.get('SECRET_KEY', 'face-attend-2024')
+    app.config['SQLALCHEMY_DATABASE_URI']        = 'sqlite:///' + os.path.join(os.path.dirname(__file__), 'attendance.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'uploads')
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-    
-    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '')
-    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')
+    app.config['UPLOAD_FOLDER']                  = os.path.join(os.path.dirname(__file__), 'uploads')
+    app.config['MAX_CONTENT_LENGTH']             = 16 * 1024 * 1024
+    app.config['MAIL_SERVER']         = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT']           = int(os.environ.get('MAIL_PORT', 587))
+    app.config['MAIL_USE_TLS']        = True
+    app.config['MAIL_USERNAME']       = os.environ.get('MAIL_USERNAME', '')
+    app.config['MAIL_PASSWORD']       = os.environ.get('MAIL_PASSWORD', '')
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME', 'noreply@office.com')
+
+    # ── FIX 1: CORS — allow Vercel frontend + localhost ──────────────────
+    raw_origins = os.environ.get(
+        'ALLOWED_ORIGINS',
+        'http://localhost:3000,http://localhost:5173,https://face-attendance-43ynllikg-shaikayeshanilofar-365zs-projects.vercel.app'
+    )
+    allowed_origins = [o.strip() for o in raw_origins.split(',') if o.strip()]
+
+    CORS(
+        app,
+        origins=allowed_origins,
+        supports_credentials=True,
+        allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'],
+        methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    )
 
     db.init_app(app)
     mail.init_app(app)
 
-    # CORS Configuration - Allow credentials with wildcard
-    CORS(app, 
-         supports_credentials=True,
-         allow_headers=['Content-Type', 'Authorization'],
-         methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-         expose_headers=['Content-Type'],
-         max_age=3600)
-    
-    # Alternative: Use a function to dynamically check origins
-    @app.after_request
-    def after_request(response):
-        origin = request.headers.get('Origin')
-        if origin:
-            response.headers.add('Access-Control-Allow-Origin', origin)
-            response.headers.add('Access-Control-Allow-Credentials', 'true')
-            response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-            response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-        return response
-    authbp = __import__('routes.auth', fromlist=['authbp']).authbp
-    employees_bp = __import__('routes.employees', fromlist=['employees_bp']).employees_bp
-    attendance_bp = __import__('routes.attendance', fromlist=['attendance_bp']).attendance_bp
-    reports_bp = __import__('routes.reports', fromlist=['reports_bp']).reports_bp
-    app.register_blueprint(authbp, url_prefix='/api/auth')
-    app.register_blueprint(employees_bp, url_prefix='/api/employees')
-    app.register_blueprint(attendance_bp, url_prefix='/api/attendance')
-    app.register_blueprint(reports_bp, url_prefix='/api/reports')
+    from routes.auth       import auth_bp
+    from routes.employees  import employees_bp
+    from routes.attendance import attendance_bp
+    from routes.reports    import reports_bp
 
-   
+    app.register_blueprint(auth_bp,       url_prefix='/api/auth')
+    app.register_blueprint(employees_bp,  url_prefix='/api/employees')
+    app.register_blueprint(attendance_bp, url_prefix='/api/attendance')
+    app.register_blueprint(reports_bp,    url_prefix='/api/reports')
 
     with app.app_context():
         from models.user import User
         from models.employee import Employee, Attendance
-        
-        # Clear out any stale, locked tables and rewrite fresh ones
         db.create_all()
-        
-        # Seed Admin user securely
-        admin_user = User.query.filter_by(username='admin').first()
-        if not admin_user:
+        if not User.query.filter_by(username='admin').first():
             admin = User(username='admin', role='admin')
             admin.set_password('admin123')
             db.session.add(admin)
             db.session.commit()
-            print('✅ Admin successfully seeded into database: admin / admin123')
-        else:
-            print('ℹ️ Admin user already exists in database.')
-            
+            print('✅ Admin seeded: admin / admin123')
+
     return app
 
 if __name__ == '__main__':
