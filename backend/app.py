@@ -31,16 +31,16 @@ def create_app():
         "https://face-attendance-pearl.vercel.app",
         "https://face-attendance-four.vercel.app"
     ], supports_credentials=True)
+    authbp = __import__('routes.auth', fromlist=['authbp']).authbp
+    employees_bp = __import__('routes.employees', fromlist=['employees_bp']).employees_bp
+    attendance_bp = __import__('routes.attendance', fromlist=['attendance_bp']).attendance_bp
+    reports_bp = __import__('routes.reports', fromlist=['reports_bp']).reports_bp
+    app.register_blueprint(authbp, url_prefix='/auth')
+    app.register_blueprint(employees_bp, url_prefix='/employees')
+    app.register_blueprint(attendance_bp, url_prefix='/attendance')
+    app.register_blueprint(reports_bp, url_prefix='/reports')
 
-    from routes.auth import auth_bp
-    from routes.employees import employees_bp
-    from routes.attendance import attendance_bp
-    from routes.reports import reports_bp
-
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(employees_bp, url_prefix='/api/employees')
-    app.register_blueprint(attendance_bp, url_prefix='/api/attendance')
-    app.register_blueprint(reports_bp, url_prefix='/api/reports')
+   
 
     with app.app_context():
         from models.user import User
