@@ -17,12 +17,16 @@ def create_app():
     app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD','')
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME','noreply@office.com')
 
+    # Link the database and mail extensions to your Flask app instance
+    db.init_app(app)
+    mail.init_app(app)
+
     # Allow all origins for deployed version (requests will have proper auth)
     CORS(app, origins=[
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "https://face-attendance-pearl.vercel.app",
-      "https://face-attendance-four.vercel.app"
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://face-attendance-pearl.vercel.app",
+        "https://face-attendance-four.vercel.app"
     ], supports_credentials=True)
 
     from routes.auth import auth_bp
