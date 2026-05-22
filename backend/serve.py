@@ -1,5 +1,6 @@
 """
 Unified server: Flask API + React frontend static files
+Serves with Gunicorn in production, Flask in development
 """
 import os
 from app import create_app
@@ -25,4 +26,5 @@ if __name__ == '__main__':
     print("   Login: admin / admin123")
     print("   Kiosk: http://localhost:5000/kiosk\n")
     port = int(os.environ.get('PORT', 5000))
+    # Dev server - gunicorn handles production
     app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
