@@ -1,15 +1,22 @@
 import os
-from flask import Flask, request
+from flask import Flask, request, session
 from flask_cors import CORS
 from extensions import db, mail
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY']                     = os.environ.get('SECRET_KEY', 'face-attend-2024')
+    app.config['SECRET_KEY']                     = os.environ.get('SECRET_KEY', 'face-attend-2024-secret')
     app.config['SQLALCHEMY_DATABASE_URI']        = 'sqlite:///' + os.path.join(os.path.dirname(__file__), 'attendance.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['UPLOAD_FOLDER']                  = os.path.join(os.path.dirname(__file__), 'uploads')
     app.config['MAX_CONTENT_LENGTH']             = 16 * 1024 * 1024
+    
+    # Session configuration
+    app.config['SESSION_COOKIE_SECURE'] = False  # Allow HTTP in dev, HTTPS in production
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['PERMANENT_SESSION_LIFETIME'] = 24 * 60 * 60  # 24 hours
+    
     app.config['MAIL_SERVER']         = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     app.config['MAIL_PORT']           = int(os.environ.get('MAIL_PORT', 587))
     app.config['MAIL_USE_TLS']        = True
